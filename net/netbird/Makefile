@@ -1,7 +1,7 @@
 PLUGIN_NAME=		netbird
-PLUGIN_VERSION=		0.3
+PLUGIN_VERSION=		0.4
 PLUGIN_DEPENDS=	    netbird
-PLUGIN_REVISION=	3
+PLUGIN_REVISION=	1
 PLUGIN_COMMENT=		Netbird plugin
 PLUGIN_MAINTAINER=	support@netbird.io
 PLUGIN_WWW=		    https:/netbird.io
