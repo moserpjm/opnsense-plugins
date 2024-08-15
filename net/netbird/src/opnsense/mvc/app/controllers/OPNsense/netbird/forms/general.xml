@@ -5,18 +5,24 @@
         <type>checkbox</type>
         <help>Enable Netbird</help>
     </field>
-        <field>
+    <field>
         <id>netbird.general.WgPort</id>
         <label>Wireguard Port</label>
         <type>text</type>
     </field>
-        <field>
+    <field>
+        <id>netbird.general.DisableCustomRouting</id>
+        <label>Disable Custom Routing</label>
+        <type>checkbox</type>
+        <help>Prevents netbird from setting the default route.</help>
+    </field>
+    <field>
         <id>netbird.general.QuantumEnabled</id>
         <label>Rosenpass Enabled</label>
         <type>checkbox</type>
         <help>Enable Rosenpass</help>
     </field>
-        <field>
+    <field>
         <id>netbird.general.QuantumPermissive</id>
         <label>Rosenpass Permissive Mode</label>
         <type>checkbox</type>
@@ -26,7 +32,9 @@
         <id>netbird.general.CarpIf</id>
         <label>CARP Interface</label>
         <type>dropdown</type>
-        <help>If set to none netbird up is executed and auto connect is enabled. If an interface is selected auto connect is disabled. Please trigger a CARP event or execute netbird up manually on the MASTER node.</help>
+        <help>If set to none netbird up is executed and auto connect is enabled. If an interface is selected auto
+            connect is disabled. Please trigger a CARP event or execute netbird up manually on the MASTER node.
+        </help>
     </field>
     <field>
         <id>netbird.general.VHID</id>

@@ -4,3 +4,6 @@ netbird_enable="YES"
 netbird_enable="NO"
 {% endif %}
 osrelease_enable="YES"
+{% if helpers.exists('OPNsense.netbird.general.DisableCustomRouting') and OPNsense.netbird.general.DisableCustomRouting|default("1") == '1' %}
+netbird_env="NB_DISABLE_CUSTOM_ROUTING=true"
+{% endif %}
