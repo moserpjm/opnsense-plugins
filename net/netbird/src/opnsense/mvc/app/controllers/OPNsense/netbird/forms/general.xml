@@ -17,6 +17,12 @@
         <help>Prevents netbird from setting routes to every peer.</help>
     </field>
     <field>
+        <id>netbird.general.DisableClientRoutes</id>
+        <label>Disable Client Routes</label>
+        <type>checkbox</type>
+        <help>Prevents netbird from setting client routes.</help>
+    </field>
+    <field>
         <id>netbird.general.QuantumEnabled</id>
         <label>Rosenpass Enabled</label>
         <type>checkbox</type>
