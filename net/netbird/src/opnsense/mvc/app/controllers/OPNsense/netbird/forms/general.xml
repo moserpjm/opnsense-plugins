@@ -14,7 +14,7 @@
         <id>netbird.general.DisableCustomRouting</id>
         <label>Disable Custom Routing</label>
         <type>checkbox</type>
-        <help>Prevents netbird from setting the default route.</help>
+        <help>Prevents netbird from setting routes to every peer.</help>
     </field>
     <field>
         <id>netbird.general.QuantumEnabled</id>
