@@ -7,3 +7,6 @@ osrelease_enable="YES"
 {% if helpers.exists('OPNsense.netbird.general.DisableCustomRouting') and OPNsense.netbird.general.DisableCustomRouting|default("1") == '1' %}
 netbird_env="NB_DISABLE_CUSTOM_ROUTING=true"
 {% endif %}
+{% if helpers.exists('OPNsense.netbird.general.DisableClientRoutes') and OPNsense.netbird.general.DisableClientRoutes|default("1") == '1' %}
+netbird_env="$netbird_env NB_DISABLE_CLIENT_ROUTES=true"
+{% endif %}
