@@ -17,11 +17,11 @@ function tailscale_services()
     $services[] = array(
         'description' => gettext('Tailscale'),
         'configd' => array(
-            'restart' => array('tailscaled restart'),
-            'start' => array('tailscaled start'),
-            'stop' => array('tailscaled stop'),
+            'restart' => array('tailscale restart'),
+            'start' => array('tailscale start'),
+            'stop' => array('tailscale stop'),
         ),
-        'name' => 'tailscaled',
+        'name' => 'tailscale',
         'pidfile' => '/var/run/tailscaled.pid'
     );
 
