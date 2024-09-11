@@ -1,0 +1,9 @@
+<acl>
+    <page-vpn-tailscale>
+        <name>VPN: Tailscale</name>
+        <patterns>
+            <pattern>ui/tailscale/*</pattern>
+            <pattern>api/tailscale/*</pattern>
+        </patterns>
+    </page-vpn-tailscale>
+</acl>

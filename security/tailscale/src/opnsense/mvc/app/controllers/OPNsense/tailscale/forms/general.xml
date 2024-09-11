@@ -1,0 +1,21 @@
+<form>
+    <field>
+        <id>tailscale.general.Enabled</id>
+        <label>Enabled</label>
+        <type>checkbox</type>
+        <help>Enable Tailscale</help>
+    </field>
+    <field>
+        <id>tailscale.general.CarpIf</id>
+        <label>CARP Interface</label>
+        <type>dropdown</type>
+        <help>If set to none tailscale up is executed and auto connect is enabled. If an interface is selected auto
+            connect is disabled. Please trigger a CARP event or execute tailscale up manually on the MASTER node.
+        </help>
+    </field>
+    <field>
+        <id>tailscale.general.VHID</id>
+        <label>CARP VHID</label>
+        <type>text</type>
+    </field>
+</form>
