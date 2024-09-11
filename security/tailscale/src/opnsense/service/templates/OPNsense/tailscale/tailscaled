@@ -1,0 +1,7 @@
+{% if helpers.exists('OPNsense.tailscale.general.Enabled') and OPNsense.tailscale.general.Enabled|default("0") == '1' %}
+tailscaled_enable="YES"
+{% else %}
+tailscaled_enable="NO"
+{% endif %}
+tailscaled_syslog_output_enable="YES"
+tailscaled_syslog_output_facility="tailscaled"
