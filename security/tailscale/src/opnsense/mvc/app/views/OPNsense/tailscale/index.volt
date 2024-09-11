@@ -8,7 +8,7 @@
             $("#saveAct_progress").addClass("fa fa-spinner fa-pulse");
             saveFormToEndpoint(url = "/api/tailscale/settings/set", formid = 'frm_GeneralSettings', callback_ok = function () {
                 ajaxCall(url = "/api/tailscale/service/reload", sendData = {}, callback = function (data, status) {
-                    updateServiceControlUI('tailscaled');
+                    updateServiceControlUI('tailscale');
                     $("#saveAct_progress").removeClass("fa fa-spinner fa-pulse");
                 });
             });
@@ -18,7 +18,7 @@
 
         let data_get_map = {'frm_GeneralSettings': "/api/tailscale/settings/get"};
         mapDataToFormUI(data_get_map).done(function (data) {
-            updateServiceControlUI('tailscaled');
+            updateServiceControlUI('tailscale');
             $('.selectpicker').selectpicker('refresh');
         });
 
