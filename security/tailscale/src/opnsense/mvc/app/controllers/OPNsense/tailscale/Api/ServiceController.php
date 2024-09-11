@@ -18,7 +18,7 @@ class ServiceController extends ApiMutableServiceControllerBase
     protected static $internalServiceClass = '\OPNsense\tailscale\Tailscale';
     protected static $internalServiceEnabled = 'general.Enabled';
     protected static $internalServiceTemplate = 'OPNsense/tailscale';
-    protected static $internalServiceName = 'tailscaled';
+    protected static $internalServiceName = 'tailscale';
 
 
 

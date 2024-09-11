@@ -21,7 +21,7 @@ function tailscale_services()
             'start' => array('tailscale start'),
             'stop' => array('tailscale stop'),
         ),
-        'name' => 'tailscaled',
+        'name' => 'tailscale',
         'pidfile' => '/var/run/tailscaled.pid'
     );
 
