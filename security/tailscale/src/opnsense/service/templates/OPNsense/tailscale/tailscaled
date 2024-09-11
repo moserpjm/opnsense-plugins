@@ -4,4 +4,4 @@ tailscaled_enable="YES"
 tailscaled_enable="NO"
 {% endif %}
 tailscaled_syslog_output_enable="YES"
-tailscaled_syslog_output_facility="tailscaled"
+tailscaled_syslog_output_facility="daemon"
