@@ -1,5 +1,6 @@
 {% if helpers.exists('OPNsense.tailscale.general.Enabled') and OPNsense.tailscale.general.Enabled|default("0") == '1' %}
 tailscaled_enable="YES"
+tailscaled_env="TS_DEBUG_NETSTACK_SUBNETS=0"
 {% else %}
 tailscaled_enable="NO"
 {% endif %}
