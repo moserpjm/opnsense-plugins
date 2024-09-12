@@ -21,7 +21,6 @@
                 }
                 $("#updown").html(data['updown']);
                 $("#constatustxt").html(data['status']);
-                std_bootgrid_reload('grid-peers');
                 $("#refreshAct_progress").removeClass("fa fa-spinner fa-pulse");
             });
         }
