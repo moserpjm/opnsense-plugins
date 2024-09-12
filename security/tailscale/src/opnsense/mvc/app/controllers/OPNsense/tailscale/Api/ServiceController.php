@@ -22,7 +22,20 @@ class ServiceController extends ApiMutableServiceControllerBase
 
 
 
-
+    public function upDownStatusAction(): string
+    {
+        $backend = new Backend();
+        $bckResult = $backend->configdRun("tailscale status");
+        if (!str_contains($bckResult, "is running")) {
+            return json_encode(array('updown' => "NOT RUNNING", 'status' => "Tailscale is not running"));
+        }
+        $bckResult = $backend->configdRun("tailscale short-con-status");
+        $txtStatus = nl2br(htmlspecialchars($bckResult));
+        if (!str_contains($bckResult, "internal")) {
+            return json_encode(array('updown' => "DOWN", 'status' => $txtStatus));
+        }
+        return json_encode(array('updown' => "UP", 'status' => $txtStatus));
+    }
 
 
 
