@@ -63,7 +63,7 @@ class ServiceController extends ApiMutableServiceControllerBase
                 $carpEnabled = $mdlTailscale->general->CarpIf->__toString() != '';
                 $action = $enabled ? "restart" : "stop";
                 $backend->configdRun("tailscale $action");
-                if($carpEnabled) {
+                if($carpEnabled && $enabled) {
                     $backend->configdRun("tailscale set-down");
                 }
             } catch (\Exception $e) {
