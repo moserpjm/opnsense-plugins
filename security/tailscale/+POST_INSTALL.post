@@ -1,1 +1,2 @@
 chmod +x /usr/local/etc/rc.syshook.d/carp/30-tailscale
+chmod +x /usr/local/etc/rc.syshook.d/start/30-tailscale
