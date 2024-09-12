@@ -63,6 +63,9 @@ class ServiceController extends ApiMutableServiceControllerBase
                 $carpEnabled = $mdlTailscale->general->CarpIf->__toString() != '';
                 $action = $enabled ? "restart" : "stop";
                 $backend->configdRun("tailscale $action");
+                if($carpEnabled) {
+                    $backend->configdRun("tailscale set-down");
+                }
             } catch (\Exception $e) {
                 $status = "failed";
                 syslog(LOG_ERR, "tailscale: failed to reload configuration: " . $e->getMessage());
