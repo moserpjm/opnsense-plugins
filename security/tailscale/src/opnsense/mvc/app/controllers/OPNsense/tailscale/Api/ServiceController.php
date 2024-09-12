@@ -30,7 +30,8 @@ class ServiceController extends ApiMutableServiceControllerBase
             return json_encode(array('updown' => "NOT RUNNING", 'status' => "Tailscale is not running"));
         }
         $bckResult = $backend->configdRun("tailscale short-con-status");
-        $txtStatus = nl2br(htmlspecialchars($bckResult));
+        $txtStatus = str_replace(' ', '&nbsp;', $bckResult);
+        $txtStatus = nl2br(htmlspecialchars($txtStatus));
         if (!str_contains($bckResult, "internal")) {
             return json_encode(array('updown' => "DOWN", 'status' => $txtStatus));
         }
