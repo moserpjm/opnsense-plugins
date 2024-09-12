@@ -2,7 +2,7 @@
     <VPN>
         <tailscale order="200" VisibleName="Tailscale" cssClass="fa fa-lock fa-fw">
             <Settings order="40" VisibleName="Settings" url="/ui/tailscale"/>
-            <ConStatus order="50" VisibleName="Connection Status" url="/ui/netbird/tailscale"/>
+            <ConStatus order="50" VisibleName="Connection Status" url="/ui/tailscale/constatus"/>
             <LogFile VisibleName="Log File" order="60" url="/ui/diagnostics/log/core/tailscaled"/>
         </tailscale>
     </VPN>
