@@ -1,0 +1,24 @@
+#!/usr/local/bin/php
+<?php
+
+
+require_once('config.inc');
+require_once('util.inc');
+require_once('interfaces.inc');
+
+
+$model = new \OPNsense\tailscale\Tailscale();
+$enabled = $model->general->Enabled->__toString();
+
+
+if(!$enabled) {
+    exit(0);
+}
+
+$carpif = $model->general->CarpIf->__toString();
+
+if($carpif != '') {
+    shell_exec('/usr/local/bin/tailscale down');
+}
+
+
