@@ -113,7 +113,9 @@ class ServiceController extends ApiMutableServiceControllerBase
                     if ($key == "routes") {
                         $result[$key] = implode("<br />", $value);
                     }
-                    $result[$key . "." . $subkey] = $subvalue;
+                    else {
+                        $result[$key . "." . $subkey] = $subvalue;
+                    }
                 }
             } else {
                 $result[$key] = $value;
