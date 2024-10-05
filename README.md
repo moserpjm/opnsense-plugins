@@ -42,6 +42,7 @@ emulators/qemu-guest-agent -- QEMU Guest Agent for OPNsense
 ftp/tftp -- TFTP server
 mail/postfix -- SMTP mail relay
 mail/rspamd -- Protect your network from spam
+misc/theme-advanced -- OPNsense theme based on AdvancedTomato GUI
 misc/theme-cicada -- The cicada theme - dark grey onyx
 misc/theme-rebellion -- A suitably dark theme
 misc/theme-tukan -- The tukan theme - blue/white
@@ -91,8 +92,7 @@ security/tor -- The Onion Router
 security/wazuh-agent -- Agent for the open source security platform Wazuh
 sysutils/apcupsd -- APCUPSD - APC UPS daemon
 sysutils/apuled -- PC Engine APU LED control (development only)
-sysutils/cpu-microcode-amd -- AMD CPU microcode updates
-sysutils/cpu-microcode-intel -- Intel CPU microcode updates
+sysutils/cpu-microcode -- CPU microcode updates
 sysutils/dec-hw -- Deciso hardware specific information
 sysutils/dmidecode -- Display hardware information on the dashboard
 sysutils/git-backup -- Track config changes using git
@@ -112,7 +112,7 @@ vendor/sunnyvalley -- Vendor Repository for Zenarmor (a.k.a Sensei, Next Generat
 www/OPNProxy -- OPNsense proxy additions
 www/c-icap -- c-icap connects the web proxy with a virus scanner
 www/cache -- Webserver cache
-www/caddy -- Easy to configure Reverse Proxy with Automatic HTTPS and Dynamic DNS
+www/caddy -- Modern Reverse Proxy with Automatic HTTPS, Dynamic DNS and Layer4 Routing
 www/nginx -- Nginx HTTP server and reverse proxy
 www/squid -- Squid is a caching proxy for the web
 www/web-proxy-sso -- Kerberos authentication module

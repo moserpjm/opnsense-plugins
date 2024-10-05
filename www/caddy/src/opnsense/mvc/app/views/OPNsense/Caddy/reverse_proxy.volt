@@ -26,16 +26,6 @@
 
 <script>
     $(document).ready(function() {
-
-        // Function to handle the search filter request modification
-        function addDomainFilterToRequest(request) {
-            let selectedDomains = $('#reverseFilter').val();
-            if (selectedDomains && selectedDomains.length > 0) {
-                request['reverseUuids'] = selectedDomains.join(',');
-            }
-            return request;
-        }
-
         // Bootgrid Setup
         $("#reverseProxyGrid").UIBootgrid({
             search:'/api/caddy/ReverseProxy/searchReverseProxy/',
@@ -106,22 +96,136 @@
             del:'/api/caddy/ReverseProxy/delHeader/',
         });
 
-        // Function to show alerts in the HTML message area
+        /**
+         * Modifies the search request to include domain filter.
+         *
+         * @param {Object} request - The original request object.
+         * @returns {Object} The modified request object with domain filter.
+         */
+        function addDomainFilterToRequest(request) {
+            let selectedDomains = $('#reverseFilter').val();
+            if (selectedDomains && selectedDomains.length > 0) {
+                request['reverseUuids'] = selectedDomains.join(',');
+            }
+            return request;
+        }
+
+        /**
+         * Displays an alert message to the user.
+         *
+         * @param {string} message - The message to display.
+         * @param {string} [type="error"] - The type of alert (error or success).
+         */
         function showAlert(message, type = "error") {
-            let alertClass = type === "error" ? "alert-danger" : "alert-success";
-            let messageArea = $("#messageArea");
+            const alertClass = type === "error" ? "alert-danger" : "alert-success";
+            const messageArea = $("#messageArea");
 
-            // Stop any current animation, clear the queue, and immediately hide the element
             messageArea.stop(true, true).hide();
-
-            // Now set the class and message
             messageArea.removeClass("alert-success alert-danger").addClass(alertClass).html(message);
-
-            // Use fadeIn to make the message appear smoothly, then fadeOut after a delay
             messageArea.fadeIn(500).delay(15000).fadeOut(500, function() {
-                // Clear the message after fading out to ensure it's clean for the next message
                 $(this).html('');
             });
+        }
+
+        /**
+         * Loads domain filters from the server and populates the filter dropdown.
+         */
+        function loadDomainFilters() {
+            ajaxGet('/api/caddy/ReverseProxy/getAllReverseDomains', null, function(data, status) {
+                let select = $('#reverseFilter');
+                select.empty(); // Clear current options
+                if (status === "success" && data && data.rows) {
+                    data.rows.forEach(function(item) {
+                        select.append($('<option>').val(item.id).text(item.domainPort));
+                    });
+                } else {
+                    select.html('<option value="">{{ lang._('Failed to load data') }}</option>');
+                }
+                select.selectpicker('refresh'); // Refresh selectpicker to update the UI
+            }).fail(function() {
+                $('#reverseFilter').html('<option value="">{{ lang._('Failed to load data') }}</option>').selectpicker('refresh');
+            });
+        }
+
+        /**
+         * Controls the visibility of the selectpicker for domain filtering.
+         *
+         * @param {string} tab - The currently active tab.
+         */
+        function toggleSelectPicker(tab) {
+            if (tab === 'handlesTab' || tab === 'domainsTab' || tab === 'subdomainsTab') {
+                $('.common-filter').show();
+            } else {
+                $('.common-filter').hide();
+            }
+        }
+
+        /**
+         * Controls the visibility of add buttons based on the active tab.
+         *
+         * @param {string} tab - The currently active tab.
+         */
+        function toggleButtonVisibility(tab) {
+            if (tab === 'handlesTab' || tab === 'domainsTab') {
+                $("#addDomainBtn").show();
+                $("#addHandleBtn").show();
+            } else {
+                $("#addDomainBtn").hide();
+                $("#addHandleBtn").hide();
+            }
+        }
+
+        /**
+         * Initializes tabs by fetching data and setting visibility.
+         */
+        function initializeTabs() {
+            ajaxGet('/api/caddy/reverse_proxy/get', null, function(response, status) {
+                if (status === "success" && response) {
+                    // Check for wildcards in domains to toggle Subdomains tab
+                    const hasWildcard = Object.values(response.caddy.reverseproxy.reverse).some(entry => entry.FromDomain.startsWith('*'));
+                    toggleTabVisibility('#tab-subdomains', hasWildcard);
+                    toggleSubdomainOptions(hasWildcard);
+
+                    // Check if Layer 4 is enabled to toggle the Layer 4 tab
+                    const enableLayer4 = response.caddy.general.EnableLayer4 === '1';
+                    toggleTabVisibility('#tab-layer4', enableLayer4);
+                } else {
+                    showAlert("{{ lang._('Failed to load data from /api/caddy/reverse_proxy/get') }}", "error");
+                }
+            }).fail(function() {
+                showAlert("{{ lang._('Failed to load data from /api/caddy/reverse_proxy/get') }}", "error");
+            });
+        }
+
+        /**
+         * Toggles the visibility of a specific tab.
+         *
+         * @param {string} tabSelector - The jQuery selector for the tab.
+         * @param {boolean} visible - Whether the tab should be visible.
+         */
+        function toggleTabVisibility(tabSelector, visible) {
+            let tab = $(tabSelector);
+            if (visible) {
+                tab.show();
+            } else {
+                tab.hide();
+                if (tab.hasClass('active')) {
+                    $('#tab-domains a').tab('show');
+                }
+            }
+        }
+
+        /**
+         * Toggles the visibility of Subdomain options in dialogHandle based on wildcard domain existence.
+         *
+         * @param {boolean} hasWildcard - Whether a wildcard domain exists.
+         */
+        function toggleSubdomainOptions(hasWildcard) {
+            if (hasWildcard) {
+                $(".Subdomain").closest('tr').show();
+            } else {
+                $(".Subdomain").closest('tr').hide();
+            }
         }
 
         // Hide message area when starting new actions
@@ -135,25 +239,19 @@
                 const dfObj = new $.Deferred();
 
                 // Perform configuration validation
-                $.ajax({
-                    url: "/api/caddy/service/validate",
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        if (data && data['status'].toLowerCase() === 'ok') {
-                            // If configuration is valid, resolve the Deferred object to proceed
-                            dfObj.resolve();
-                        } else {
-                            // If configuration is invalid, show alert and reject the Deferred object
-                            showAlert(data['message'], "{{ lang._('Validation Failed') }}");
-                            dfObj.reject();
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        // On AJAX error, show alert and reject the Deferred object
-                        showAlert("{{ lang._('Validation request failed: ') }}" + error, "{{ lang._('Error') }}");
+                ajaxGet("/api/caddy/service/validate", null, function(data, status) {
+                    if (status === "success" && data && data['status'].toLowerCase() === 'ok') {
+                        // If configuration is valid, resolve the Deferred object to proceed
+                        dfObj.resolve();
+                    } else {
+                        // If configuration is invalid, show alert and reject the Deferred object
+                        showAlert(data['message'], "error");
                         dfObj.reject();
                     }
+                }).fail(function(xhr, status, error) {
+                    // On AJAX error, show alert and reject the Deferred object
+                    showAlert("{{ lang._('Validation request failed: ') }}" + error, "error");
+                    dfObj.reject();
                 });
 
                 return dfObj.promise();
@@ -165,38 +263,12 @@
                     // Update the service control UI for 'caddy'
                     updateServiceControlUI('caddy');
                     // Update the Tab visibility
-                    initializeTabs()
+                    initializeTabs();
                 } else {
-                    console.error("{{ lang._('Action was not successful or an error occurred:') }}", data);
+                    showAlert("{{ lang._('Action was not successful or an error occurred.') }}", "error");
                 }
             }
         });
-
-        // Initialize the service control UI for 'caddy'
-        updateServiceControlUI('caddy');
-
-        // Filter function for domains
-        function loadDomainFilters() {
-            $.ajax({
-                url: '/api/caddy/ReverseProxy/getAllReverseDomains', // custom API endpoint to get uuid and domainport combinations
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    let select = $('#reverseFilter');
-                    select.empty(); // Clear current options
-                    if (data && data.rows) {
-                        data.rows.forEach(function(item) {
-                            select.append($('<option>').val(item.id).text(item.domainPort));
-                        });
-                    }
-                    select.selectpicker('refresh'); // Refresh selectpicker to update the UI
-                },
-                error: function() {
-                    $('#reverseFilter').html('<option value="">{{ lang._('Failed to load data') }}</option>').selectpicker('refresh');
-                }
-            });
-        }
-        loadDomainFilters();
 
         // Reload Bootgrid on filter change
         $('#reverseFilter').on('changed.bs.select', function() {
@@ -205,23 +277,16 @@
             $("#reverseHandleGrid").bootgrid("reload");
         });
 
-        // Control the visibility of selectpicker for filter by domain
-        function toggleSelectPicker(tab) {
-            if (tab === 'handlesTab' || tab === 'domainsTab' || tab === 'subdomainsTab') {
-                $('.common-filter').show();
-            } else {
-                $('.common-filter').hide();
-            }
-        }
-
         // Initialize visibility based on the active tab on page load
         let activeTab = $('#maintabs .active a').attr('href').replace('#', '');
         toggleSelectPicker(activeTab);
+        toggleButtonVisibility(activeTab);
 
         // Change event when switching tabs
         $('#maintabs a').on('click', function (e) {
             let currentTab = $(this).attr('href').replace('#', '');
             toggleSelectPicker(currentTab);
+            toggleButtonVisibility(currentTab);
         });
 
         // Add click event listener for "Add HTTP Handler" button
@@ -248,50 +313,34 @@
             }
         });
 
-        // Perform an API call to get data and check tabs' visibility on initial load
-        function initializeTabs() {
-            $.ajax({
-                url: '/api/caddy/reverse_proxy/get',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    // Check for wildcards in domains to toggle Subdomains tab
-                    const hasWildcard = Object.values(response.caddy.reverseproxy.reverse).some(entry => entry.FromDomain.startsWith('*'));
-                    toggleTabVisibility('#tab-subdomains', hasWildcard);
-
-                    // Check if Layer 4 is enabled to toggle the Layer 4 tab
-                    const enableLayer4 = response.caddy.general.EnableLayer4 === '1';
-                    toggleTabVisibility('#tab-layer4', enableLayer4);
-                },
-                error: function() {
-                    console.error("{{ lang._('Failed to load data from /api/caddy/reverse_proxy/get') }}");
-                }
-            });
-        }
-
-        // Generic function to show or hide a tab and switch to another tab if the current one is hidden
-        function toggleTabVisibility(tabSelector, visible) {
-            let tab = $(tabSelector);
-            if (visible) {
-                tab.show();
+        // Show TLS options based on chosen protocol
+        $("#handle\\.HttpTls").change(function() {
+            if ($(this).val() === "0") {
+                $(".HttpTls").closest('tr').hide();
             } else {
-                tab.hide();
-                // Switch to 'Domains' tab if the currently active tab is being hidden
-                if (tab.hasClass('active')) {
-                    $('#tab-domains a').tab('show');
-                }
+                $(".HttpTls").closest('tr').show();
             }
-        }
+        });
 
-        // Initialize tabs on load
+        $("#reverse\\.DisableTls").change(function() {
+            if ($(this).val() === "1") {
+                $(".DisableTls").closest('tr').hide();
+            } else {
+                $(".DisableTls").closest('tr').show();
+            }
+        });
+
+        // Initialize tabs, service control and filter selectpicker
         initializeTabs();
+        updateServiceControlUI('caddy');
+        loadDomainFilters();
 
     });
 </script>
 
 <style>
     .common-filter {
-        text-align: right;
+        align-items: center;
         margin-top: 20px;
         margin-right: 5px;
         padding: 0 15px;  // Align with the tables
@@ -338,16 +387,16 @@
                         <tr>
                             <th data-column-id="uuid" data-type="string" data-identifier="true" data-visible="false">{{ lang._('ID') }}</th>
                             <th data-column-id="enabled" data-width="6em" data-type="boolean" data-formatter="rowtoggle">{{ lang._('Enabled') }}</th>
+                            <th data-column-id="DisableTls" data-type="string">{{ lang._('Protocol') }}</th>
                             <th data-column-id="FromDomain" data-type="string">{{ lang._('Domain') }}</th>
                             <th data-column-id="FromPort" data-type="string">{{ lang._('Port') }}</th>
                             <th data-column-id="accesslist" data-type="string" data-visible="false">{{ lang._('Access List') }}</th>
                             <th data-column-id="basicauth" data-type="string" data-visible="false">{{ lang._('Basic Auth') }}</th>
-                            <th data-column-id="DnsChallenge" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('DNS-01 challenge') }}</th>
+                            <th data-column-id="DnsChallenge" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('DNS-01 Challenge') }}</th>
                             <th data-column-id="DynDns" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('Dynamic DNS') }}</th>
                             <th data-column-id="AccessLog" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('HTTP Access Log') }}</th>
-                            <th data-column-id="CustomCertificate" data-type="string" data-visible="false">{{ lang._('Custom Certificate') }}</th>
-                            <th data-column-id="AcmePassthrough" data-type="string" data-visible="false">{{ lang._('HTTP-01 redirection') }}</th>
-                            <th data-column-id="DisableTls" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('Disable TLS') }}</th>
+                            <th data-column-id="CustomCertificate" data-type="string" data-visible="false">{{ lang._('Certificate') }}</th>
+                            <th data-column-id="AcmePassthrough" data-type="string" data-visible="false">{{ lang._('HTTP-01 Challenge Redirection') }}</th>
                             <th data-column-id="description" data-type="string">{{ lang._('Description') }}</th>
                             <th data-column-id="commands" data-width="7em" data-formatter="commands" data-sortable="false">{{ lang._('Commands') }}</th>
                         </tr>
@@ -358,7 +407,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addReverseProxyBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addReverseProxyBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -383,7 +432,7 @@
                             <th data-column-id="accesslist" data-type="string" data-visible="false">{{ lang._('Access List') }}</th>
                             <th data-column-id="basicauth" data-type="string" data-visible="false">{{ lang._('Basic Auth') }}</th>
                             <th data-column-id="DynDns" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('Dynamic DNS') }}</th>
-                            <th data-column-id="AcmePassthrough" data-type="string" data-visible="false">{{ lang._('HTTP-01 redirection') }}</th>
+                            <th data-column-id="AcmePassthrough" data-type="string" data-visible="false">{{ lang._('HTTP-01 Challenge Redirection') }}</th>
                             <th data-column-id="description" data-type="string">{{ lang._('Description') }}</th>
                             <th data-column-id="commands" data-width="7em" data-formatter="commands" data-sortable="false">{{ lang._('Commands') }}</th>
                         </tr>
@@ -394,7 +443,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addSubdomainBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addSubdomainBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -416,18 +465,19 @@
                             <th data-column-id="enabled" data-width="6em" data-type="boolean" data-formatter="rowtoggle">{{ lang._('Enabled') }}</th>
                             <th data-column-id="reverse" data-type="string">{{ lang._('Domain') }}</th>
                             <th data-column-id="subdomain" data-type="string">{{ lang._('Subdomain') }}</th>
-                            <th data-column-id="HandleType" data-type="string" data-visible="false">{{ lang._('Handle Type') }}</th>
-                            <th data-column-id="HandlePath" data-type="string" data-visible="false">{{ lang._('Handle Path') }}</th>
-                            <th data-column-id="header" data-type="string" data-visible="false">{{ lang._('Header') }}</th>
+                            <th data-column-id="HandleType" data-type="string" data-visible="false">{{ lang._('Handler') }}</th>
+                            <th data-column-id="HandlePath" data-type="string" data-visible="false">{{ lang._('Path') }}</th>
+                            <th data-column-id="header" data-type="string" data-visible="false">{{ lang._('HTTP Headers') }}</th>
+                            <th data-column-id="HttpTls" data-type="string" data-visible="false">{{ lang._('Protocol') }}</th>
                             <th data-column-id="ToDomain" data-type="string">{{ lang._('Upstream Domain') }}</th>
                             <th data-column-id="ToPort" data-type="string">{{ lang._('Upstream Port') }}</th>
                             <th data-column-id="ToPath" data-type="string" data-visible="false">{{ lang._('Upstream Path') }}</th>
-                            <th data-column-id="PassiveHealthFailDuration" data-type="string" data-visible="false">{{ lang._('Fail Duration') }}</th>
+                            <th data-column-id="PassiveHealthFailDuration" data-type="string" data-visible="false">{{ lang._('Upstream Fail Duration') }}</th>
                             <th data-column-id="ForwardAuth" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('Forward Auth') }}</th>
-                            <th data-column-id="HttpTls" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('TLS') }}</th>
+                            <th data-column-id="accesslist" data-type="string" data-visible="false">{{ lang._('Access List') }}</th>
                             <th data-column-id="HttpVersion" data-type="string" data-visible="false">{{ lang._('HTTP Version') }}</th>
                             <th data-column-id="HttpKeepalive" data-type="string" data-visible="false">{{ lang._('HTTP Keepalive') }}</th>
-                            <th data-column-id="HttpTlsTrustedCaCerts" data-type="string" data-visible="false">{{ lang._('TLS CA') }}</th>
+                            <th data-column-id="HttpTlsTrustedCaCerts" data-type="string" data-visible="false">{{ lang._('TLS Trust Pool') }}</th>
                             <th data-column-id="HttpTlsServerName" data-type="string" data-visible="false">{{ lang._('TLS Server Name') }}</th>
                             <th data-column-id="HttpNtlm" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('NTLM') }}</th>
                             <th data-column-id="HttpTlsInsecureSkipVerify" data-type="boolean" data-formatter="boolean" data-visible="false">{{ lang._('TLS Insecure Skip Verify') }}</th>
@@ -441,7 +491,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addReverseHandleBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addReverseHandleBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -476,7 +526,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addAccessListBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addAccessListBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -504,7 +554,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addBasicAuthBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addBasicAuthBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -537,7 +587,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addReverseHeaderBtn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addReverseHeaderBtn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
@@ -574,7 +624,7 @@
                         <tr>
                             <td></td>
                             <td>
-                                <button id="addReverseLayer4Btn" data-action="add" type="button" class="btn btn-xs btn-default"><span class="fa fa-plus"></span></button>
+                                <button id="addReverseLayer4Btn" data-action="add" type="button" class="btn btn-xs btn-primary"><span class="fa fa-plus"></span></button>
                                 <button data-action="deleteSelected" type="button" class="btn btn-xs btn-default"><span class="fa fa-trash-o"></span></button>
                             </td>
                         </tr>
