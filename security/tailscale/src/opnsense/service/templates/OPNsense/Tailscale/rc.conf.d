@@ -38,6 +38,9 @@ tailscaled_port="{{ OPNsense.tailscale.settings.listenPort }}"
 {%    if helpers.exists('OPNsense.tailscale.authentication.loginServer') %}
 {%      do up_args.append("--login-server=" + OPNsense.tailscale.authentication.loginServer) %}
 {%    endif %}
+{%    if helpers.exists('OPNsense.tailscale.settings.hostName') %}
+{%      do up_args.append("--hostname=" + OPNsense.tailscale.settings.hostName) %}
+{%    endif %}
 {%    if helpers.exists('OPNsense.tailscale.authentication.preAuthKey') %}
 {%      do up_args.append("--auth-key=" + OPNsense.tailscale.authentication.preAuthKey) %}
 {%    else %}
