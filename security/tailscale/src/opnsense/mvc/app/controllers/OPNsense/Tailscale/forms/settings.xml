@@ -15,6 +15,21 @@
         </help>
     </field>
     <field>
+        <id>settings.carpIf</id>
+        <label>CARP Interface</label>
+        <type>dropdown</type>
+        <advanced>true</advanced>
+        <help>If set to none tailscale up is executed and auto connect is enabled. If an interface is selected auto
+            connect is disabled. Please trigger a CARP event or execute tailscale up manually on the MASTER node.
+        </help>
+    </field>
+    <field>
+        <id>settings.vhid</id>
+        <label>CARP VHID</label>
+        <type>text</type>
+        <advanced>true</advanced>
+    </field>
+    <field>
         <id>settings.listenPort</id>
         <label>Listen Port</label>
         <type>text</type>
