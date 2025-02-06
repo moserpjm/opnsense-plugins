@@ -49,5 +49,12 @@
         <hostName type="TextField">
             <Required>N</Required>
         </hostName>
+        <carpIf type="InterfaceField">
+            <Required>N</Required>
+        </carpIf>
+        <vhid type="IntegerField">
+            <Required>N</Required>
+            <default>1</default>
+        </vhid>
     </items>
 </model>
