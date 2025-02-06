@@ -46,5 +46,8 @@
                 <description type="DescriptionField"/>
             </subnet4>
         </subnets>
+        <hostName type="TextField">
+            <Required>N</Required>
+        </hostName>
     </items>
 </model>
