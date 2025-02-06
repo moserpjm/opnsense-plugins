@@ -41,12 +41,17 @@ if ($carpif != $friendly || $vhid != $target_vhid) {
     exit(0);
 }
 
-//switch ($type) {
-//    case 'MASTER':
-//        shell_exec('/usr/local/bin/tailscale up');
-//        break;
-//    case 'BACKUP':
-//        shell_exec('/usr/local/bin/tailscale down');
-//        break;
-//}
+$backend = new \OPNsense\Core\Backend();
+switch ($type) {
+    case 'MASTER':
+        touch('/var/run/tailscale/CARP_MASTER');
+        $backend->configdRun('tailscale start');
+        break;
+    case 'BACKUP':
+        if (file_exists('/var/run/tailscale/CARP_MASTER')) {
+            unlink('/var/run/tailscale/CARP_MASTER');
+        }
+        $backend->configdRun('tailscale stop');
+        break;
+}
 
