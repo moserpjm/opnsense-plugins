@@ -59,6 +59,8 @@ if [ -f /var/db/tailscale/tailscaled.state ]; then
 fi
 {%      endif %}
 tailscaled_up_args="{{ up_args|join(' ') }} ${tailscaled_up_args_ext}"
+tailscaled_syslog_output_enable="YES"
+tailscaled_syslog_output_facility="daemon"
 {%  else %}
 tailscaled_enable="NO"
 {%  endif %}
