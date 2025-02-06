@@ -31,6 +31,11 @@ function tailscale_enabled()
     return !empty((string)(new \OPNsense\Tailscale\Settings())->enabled);
 }
 
+function carp_enabled()
+{
+    return !empty((string)(new \OPNsense\Tailscale\Settings())->carpIf);
+}
+
 function tailscale_services()
 {
     $services = [];
@@ -48,6 +53,7 @@ function tailscale_services()
             'stop' => ['tailscale stop'],
         ],
         'name' => 'tailscale',
+        'locked' => carp_enabled(),
     ];
 
     return $services;

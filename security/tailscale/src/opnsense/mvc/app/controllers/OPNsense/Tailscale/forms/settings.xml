@@ -19,14 +19,15 @@
         <label>CARP Interface</label>
         <type>dropdown</type>
         <advanced>true</advanced>
-        <help>If set to none tailscale up is executed and auto connect is enabled. If an interface is selected auto
-            connect is disabled. Please trigger a CARP event or execute tailscale up manually on the MASTER node.
+        <help>If set to none the tailscale service is enabled. If an interface is selected the service gets disabled and stopped.
+            Please trigger a CARP event or execute tailscale up manually on the MASTER node.
         </help>
     </field>
     <field>
         <id>settings.vhid</id>
         <label>CARP VHID</label>
         <type>text</type>
+        <help>VHID to listen for CARP events.</help>
         <advanced>true</advanced>
     </field>
     <field>

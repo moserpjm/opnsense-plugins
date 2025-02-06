@@ -40,10 +40,12 @@ class SettingsController extends ApiMutableModelControllerBase
     {
         return $this->searchBase("subnets.subnet4", null, "subnet");
     }
+
     public function setSubnetAction($uuid)
     {
         return $this->setBase("subnet4", "subnets.subnet4", $uuid);
     }
+
     public function addSubnetAction()
     {
         return $this->addBase("subnet4", "subnets.subnet4");
