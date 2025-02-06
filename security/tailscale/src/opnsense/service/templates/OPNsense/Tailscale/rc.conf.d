@@ -55,6 +55,8 @@ tailscaled_port="{{ OPNsense.tailscale.settings.listenPort }}"
 {%      do up_args.append("--advertise-routes=") %}
 {%    endif %}
 tailscaled_up_args="{{ up_args|join(' ') }}"
+tailscaled_syslog_output_enable="YES"
+tailscaled_syslog_output_facility="daemon"
 {%  else %}
 tailscaled_enable=NO
 {%  endif %}
