@@ -6,6 +6,7 @@ require_once('config.inc');
 require_once('util.inc');
 require_once('interfaces.inc');
 
+const CARP_MASTER_FILE = '/var/run/tailscale/CARP_MASTER';
 
 $model = new \OPNsense\Tailscale\Settings();
 $enabled = $model->enabled->__toString();
@@ -44,12 +45,12 @@ if ($carpif != $friendly || $vhid != $target_vhid) {
 $backend = new \OPNsense\Core\Backend();
 switch ($type) {
     case 'MASTER':
-        touch('/var/run/tailscale/CARP_MASTER');
+        touch(CARP_MASTER_FILE);
         $backend->configdRun('tailscale start');
         break;
     case 'BACKUP':
-        if (file_exists('/var/run/tailscale/CARP_MASTER')) {
-            unlink('/var/run/tailscale/CARP_MASTER');
+        if (file_exists(CARP_MASTER_FILE)) {
+            unlink(CARP_MASTER_FILE);
         }
         $backend->configdRun('tailscale stop');
         break;
