@@ -19,9 +19,7 @@
         <label>CARP Interface</label>
         <type>dropdown</type>
         <advanced>true</advanced>
-        <help>If set to none the tailscale service is enabled. If an interface is selected the service gets disabled and stopped.
-            Please trigger a CARP event or execute tailscale up manually on the MASTER node.
-        </help>
+        <help>If set the Tailscale service is controlled by CARP events.</help>
     </field>
     <field>
         <id>settings.vhid</id>
@@ -41,7 +39,7 @@
         <label>Host Name</label>
         <type>text</type>
         <advanced>true</advanced>
-        <help>Set a different hostname.</help>
+        <help>If set Tailscale will report this hostname to the control plane instead of the real one.</help>
     </field>
     <field>
         <id>settings.acceptDNS</id>
