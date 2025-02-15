@@ -28,7 +28,6 @@
 
 namespace OPNsense\Tailscale\Api;
 
-
 use OPNsense\Base\ApiMutableServiceControllerBase;
 use OPNsense\Core\Backend;
 use OPNsense\Core\Config;
@@ -45,7 +44,7 @@ class ServiceController extends ApiMutableServiceControllerBase
     protected static $internalServiceTemplate = 'OPNsense/Tailscale';
     protected static $internalServiceName = 'tailscale';
 
-    const CARP_MASTER_FILE = '/var/run/tailscale/CARP_MASTER';
+    private const CARP_MASTER_FILE = '/var/run/tailscale/CARP_MASTER';
 
     public function reconfigureAction()
     {
@@ -86,5 +85,4 @@ class ServiceController extends ApiMutableServiceControllerBase
         }
         return false;
     }
-
 }
