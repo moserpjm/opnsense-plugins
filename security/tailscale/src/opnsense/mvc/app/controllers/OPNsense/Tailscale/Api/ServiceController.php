@@ -27,10 +27,12 @@
  */
 
 namespace OPNsense\Tailscale\Api;
-require_once('interfaces.inc');
+
 
 use OPNsense\Base\ApiMutableServiceControllerBase;
 use OPNsense\Core\Backend;
+use OPNsense\Core\Config;
+use OPNsense\Tailscale\Settings;
 
 /**
  * Class ServiceController
@@ -43,17 +45,19 @@ class ServiceController extends ApiMutableServiceControllerBase
     protected static $internalServiceTemplate = 'OPNsense/Tailscale';
     protected static $internalServiceName = 'tailscale';
 
+    const CARP_MASTER_FILE = '/var/run/tailscale/CARP_MASTER';
+
     public function reconfigureAction()
     {
-        $settings = new \OPNsense\Tailscale\Settings();
+        $settings = new Settings();
         $carpif = $settings->carpIf->__toString();
 
+
         if ($carpif != "" && $this->isCarpMaster()) {
-            touch('/var/run/tailscale/CARP_MASTER');
-        } else
-            if (file_exists('/var/run/tailscale/CARP_MASTER')) {
-                unlink('/var/run/tailscale/CARP_MASTER');
-            }
+            touch(self::CARP_MASTER_FILE);
+        } elseif (file_exists(self::CARP_MASTER_FILE)) {
+            unlink(self::CARP_MASTER_FILE);
+        }
 
 
         return parent::reconfigureAction();
@@ -61,11 +65,11 @@ class ServiceController extends ApiMutableServiceControllerBase
 
     private function isCarpMaster()
     {
-        $settings = new \OPNsense\Tailscale\Settings();
+        $settings = new Settings();
         $carpif = $settings->carpIf->__toString();
         $vhid = $settings->vhid;
         $realif = null;
-        $config = \OPNsense\Core\Config::getInstance()->object();
+        $config = Config::getInstance()->object();
         if ($config->interfaces->count() > 0) {
             foreach ($config->interfaces->children() as $key => $node) {
                 if ($key == $carpif) {
