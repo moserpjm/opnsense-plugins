@@ -2,57 +2,112 @@
 <?php
 
 
+use OPNsense\Core\Backend;
+use OPNsense\Tailscale\Settings;
+
 require_once('config.inc');
 require_once('util.inc');
 require_once('interfaces.inc');
 
+// File to track CARP MASTER state
 const CARP_MASTER_FILE = '/var/run/tailscale/CARP_MASTER';
+// Lock file to prevent concurrent executions
+const CARP_HOOK_LOCK_FILE = '/var/run/tailscale/CARP_HOOK_LOCK';
 
-$model = new \OPNsense\Tailscale\Settings();
-$enabled = $model->enabled->__toString();
+// Parse command line arguments
+// Expected format: script.php "VHID@interface" "MASTER|BACKUP"
+$subsystem = $argv[1] ?? '';
+$type = $argv[2] ?? '';
 
+// Validate state type early to avoid unnecessary processing
+// Only MASTER and BACKUP states are handled
+if (!in_array($type, ['MASTER', 'BACKUP'], true)) {
+    exit(1);  // Exit with error for invalid state
+}
 
-if (!$enabled) {
+// Validate subsystem format (must contain @ separator)
+// Format: VHID@interface (e.g., "1@em0")
+if (!str_contains($subsystem, '@')) {
+    exit(1);  // Exit with error for invalid format
+}
+
+// Load Tailscale settings model only after basic validation passes
+// This optimization avoids loading the model for invalid calls
+$model = new Settings();
+
+// Check if Tailscale CARP integration is enabled
+// Exit silently if disabled (normal operation, not an error)
+if (!((string)$model->enabled)) {
     exit(0);
 }
 
-$carpif = $model->carpIf->__toString();
-
-if ($carpif == '') {
-    exit(0);
+// Get the configured CARP interface for Tailscale
+// Exit if no interface is configured
+$carpif = (string)$model->carpIf;
+if (empty($carpif)) {
+    exit(0);  // No interface configured, nothing to do
 }
 
-$target_vhid = $model->vhid;
-$subsystem = !empty($argv[1]) ? $argv[1] : '';
-$type = !empty($argv[2]) ? $argv[2] : '';
+// Get the configured Virtual Host ID (VHID)
+$target_vhid = (string)$model->vhid;
 
-if ($type != 'MASTER' && $type != 'BACKUP') {
-    exit(1);
-}
+// Parse the subsystem string to extract VHID and interface
+// Limit to 2 parts to handle interface names with special characters
+[$vhid, $iface] = explode('@', $subsystem, 2);
 
-if (!strstr($subsystem, '@')) {
-    exit(1);
-}
-
-list ($vhid, $iface) = explode('@', $subsystem);
+// Convert system interface name to OPNsense friendly name
+// e.g., "em0" might become "wan" or "lan"
 $friendly = convert_real_interface_to_friendly_interface_name($iface);
 
-
-if ($carpif != $friendly || $vhid != $target_vhid) {
-    exit(0);
+// Check if this CARP event is for our configured interface and VHID
+// Exit silently if this event is for a different CARP instance
+if ($carpif !== $friendly || $vhid !== $target_vhid) {
+    exit(0);  // Not our CARP instance, ignore
 }
 
-$backend = new \OPNsense\Core\Backend();
-switch ($type) {
-    case 'MASTER':
-        touch(CARP_MASTER_FILE);
-        $backend->configdRun('tailscale start');
-        break;
-    case 'BACKUP':
-        if (file_exists(CARP_MASTER_FILE)) {
-            unlink(CARP_MASTER_FILE);
-        }
-        $backend->configdRun('tailscale stop');
-        break;
+// Initialize backend service handler for Tailscale commands
+// Only created after confirming this event is relevant
+$backend = new Backend();
+
+// Ensure the runtime directory exists for lock and state files
+$lockDir = dirname(CARP_HOOK_LOCK_FILE);
+if (!is_dir($lockDir)) {
+    @mkdir($lockDir, 0755, true);
+}
+
+// Acquire exclusive lock to prevent race conditions during state transitions
+// This is critical when multiple CARP events fire in quick succession
+$lockFile = fopen(CARP_HOOK_LOCK_FILE, 'c+');
+if (!$lockFile) {
+    log_msg("tailscale: Failed to open lock file");
+    exit(1);
+}
+
+// Use exclusive lock (LOCK_EX) to ensure only one process handles state change at a time
+if (!flock($lockFile, LOCK_EX)) {
+    log_msg("tailscale: Failed to acquire lock");
+    fclose($lockFile);
+    exit(1);
+}
+
+// Protected critical section - handle CARP state transition
+try {
+    switch ($type) {
+        case 'MASTER':
+            // Mark this node as MASTER and start Tailscale service
+            touch(CARP_MASTER_FILE);
+            $backend->configdRun('tailscale start');
+            break;
+        case 'BACKUP':
+            // Remove MASTER marker and stop Tailscale service
+            // Using @ to suppress warning if file doesn't exist
+            @unlink(CARP_MASTER_FILE);
+            $backend->configdRun('tailscale stop');
+            break;
+    }
+} finally {
+    // Always release lock and close file handle, even if an exception occurs
+    flock($lockFile, LOCK_UN);
+    fclose($lockFile);
 }
 
