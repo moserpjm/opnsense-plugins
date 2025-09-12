@@ -6,6 +6,17 @@ https://tailscale.com/
 Plugin Changelog
 ================
 
+1.4.1
+
+* improved CARP hook script
+
+1.4
+
+* add CARP support
+* add hostname option
+* add syslog support
+* add menu entry for viewing logs
+
 1.3
 
 * modify RC script to prevent re-using auth key if already authenticated
