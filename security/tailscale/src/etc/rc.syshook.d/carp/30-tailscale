@@ -105,6 +105,7 @@ try {
             $backend->configdRun('tailscale stop');
             break;
     }
+    log_msg(sprintf("tailscale: CARP state transition: %s, vhid=%s, iface=%s", $type, $vhid, $friendly));
 } finally {
     // Always release lock and close file handle, even if an exception occurs
     flock($lockFile, LOCK_UN);
