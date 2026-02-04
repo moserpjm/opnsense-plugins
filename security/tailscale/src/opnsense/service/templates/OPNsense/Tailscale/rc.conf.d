@@ -44,6 +44,8 @@ tailscaled_port="{{ OPNsense.tailscale.settings.listenPort }}"
 {%    endif %}
 {%    if helpers.exists('OPNsense.tailscale.settings.hostName') %}
 {%      do up_args.append("--hostname=" + OPNsense.tailscale.settings.hostName) %}
+{%    else %}
+{%      do up_args.append("--hostname=") %}
 {%    endif %}
 {#    loop through subnets to build list #}
 {%      if helpers.exists('OPNsense.tailscale.settings.subnets.subnet4') %}
