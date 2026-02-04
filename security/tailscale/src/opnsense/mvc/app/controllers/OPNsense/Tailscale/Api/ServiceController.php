@@ -51,13 +51,11 @@ class ServiceController extends ApiMutableServiceControllerBase
         $settings = new Settings();
         $carpif = $settings->carpIf->__toString();
 
-
         if ($carpif != "" && $this->isCarpMaster()) {
             touch(self::CARP_MASTER_FILE);
         } elseif (file_exists(self::CARP_MASTER_FILE)) {
             unlink(self::CARP_MASTER_FILE);
         }
-
 
         return parent::reconfigureAction();
     }
@@ -77,7 +75,17 @@ class ServiceController extends ApiMutableServiceControllerBase
                 }
             }
         }
+
+        if ($realif === null) {
+            return false;
+        }
+
         $ifconfig = json_decode((new Backend())->configdRun('interface list ifconfig'), true);
+
+        if (!isset($ifconfig[$realif]['carp'])) {
+            return false;
+        }
+
         foreach ($ifconfig[$realif]['carp'] as $item) {
             if ($item["vhid"] == $vhid && $item["status"] == "MASTER") {
                 return true;

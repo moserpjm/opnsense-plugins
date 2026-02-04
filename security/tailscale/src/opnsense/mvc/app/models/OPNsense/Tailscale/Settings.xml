@@ -55,6 +55,8 @@
         <vhid type="IntegerField">
             <Required>N</Required>
             <default>1</default>
+            <MinimumValue>1</MinimumValue>
+            <MaximumValue>255</MaximumValue>
         </vhid>
     </items>
 </model>
