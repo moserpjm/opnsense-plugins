@@ -42,6 +42,9 @@ tailscaled_port="{{ OPNsense.tailscale.settings.listenPort }}"
 {%    if helpers.exists('OPNsense.tailscale.authentication.loginServer') %}
 {%      do up_args.append("--login-server=" + OPNsense.tailscale.authentication.loginServer) %}
 {%    endif %}
+{%    if helpers.exists('OPNsense.tailscale.settings.hostName') %}
+{%      do up_args.append("--hostname=" + OPNsense.tailscale.settings.hostName) %}
+{%    endif %}
 {#    loop through subnets to build list #}
 {%      if helpers.exists('OPNsense.tailscale.settings.subnets.subnet4') %}
 {%        set subnets = [] %}
