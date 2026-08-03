@@ -6,6 +6,17 @@ https://tailscale.com/
 Plugin Changelog
 ================
 
+1.5.1
+
+* improved CARP hook script
+
+1.5
+
+* add CARP support
+* add hostname option
+* add syslog support
+* add menu entry for viewing logs
+
 1.4
 
 * set pre-auth key field in UI to optional, enables registration via pre-auth key or AuthURL from status page
