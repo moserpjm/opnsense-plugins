@@ -60,6 +60,34 @@ class ServiceController extends ApiMutableServiceControllerBase
         return parent::reconfigureAction();
     }
 
+    /**
+     * stop and disable the service and remove the node state, the node registers
+     * as a new device once the service is enabled again
+     */
+    public function resetAction()
+    {
+        if (!$this->request->isPost()) {
+            return ['status' => 'failed', 'message' => gettext('Only POST requests are allowed.')];
+        }
+
+        $backend = new Backend();
+
+        /* stop before removing the state, tailscaled writes it again on shutdown */
+        $backend->configdRun('tailscale stop');
+
+        $settings = new Settings();
+        $settings->enabled->setValue('0');
+        $settings->serializeToConfig();
+        Config::getInstance()->save();
+        $backend->configdRun('template reload OPNsense/Tailscale');
+
+        $backend->configdRun('tailscale reset-state');
+
+        $message = gettext('Tailscale has been stopped and disabled, the node state was removed.');
+
+        return ['status' => 'ok', 'message' => $message];
+    }
+
     private function isCarpMaster()
     {
         $settings = new Settings();

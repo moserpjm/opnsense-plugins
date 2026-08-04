@@ -15,6 +15,30 @@
             }
         });
 
+        $("#resetAct").click(function() {
+            stdDialogConfirm(
+                '{{ lang._('Confirmation Required') }}',
+                '{{ lang._('Stop and disable Tailscale and remove the node state? The node registers as a new device once Tailscale is enabled again.') }}',
+                '{{ lang._('Yes') }}', '{{ lang._('Cancel') }}',
+                function() {
+                    $("#resetMessage").hide();
+                    $("#resetAct_progress").addClass("fa fa-spinner fa-pulse");
+                    ajaxCall(url = "/api/tailscale/service/reset", sendData = {},
+                        callback = function(data, status) {
+                            $("#resetAct_progress").removeClass("fa fa-spinner fa-pulse");
+                            let failed = status != "success" || data['status'] != 'ok';
+                            $("#resetMessage")
+                                .removeClass("alert-info alert-danger")
+                                .addClass(failed ? "alert-danger" : "alert-info")
+                                .html(data['message'] ? data['message'] : '{{ lang._('Unable to reset the node state.') }}')
+                                .show();
+                            updateServiceControlUI('tailscale');
+                        }
+                    );
+                }
+            );
+        });
+
     });
 </script>
 <div class="content-box">
@@ -33,7 +57,11 @@
                     data-error-title="{{ lang._('Error reconfiguring Tailscale') }}"
                     type="button"
             ></button>
+            <button class="btn btn-default" id="resetAct" type="button">
+                {{ lang._('Reset') }} <i id="resetAct_progress"></i>
+            </button>
             <br/><br/>
+            <div id="resetMessage" class="alert" style="display: none" role="alert"></div>
         </div>
     </div>
 </section>

@@ -8,7 +8,8 @@ Plugin Changelog
 
 1.6
 
-* add option to advertise ACL tags, allows registering a tag owned node with a pre-auth key or via the AuthURL from the status page
+* add option to advertise ACL tags, allows registering a tag owned node via the AuthURL from the status page
+* add reset button, stops and disables the service and removes the node state so the node can be registered again
 
 1.5.1
 
