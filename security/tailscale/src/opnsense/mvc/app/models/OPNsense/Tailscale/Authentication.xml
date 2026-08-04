@@ -7,5 +7,12 @@
             <Required>Y</Required>
         </loginServer>
         <preAuthKey type="TextField"/>
+        <advertiseTags type="TextField">
+            <Required>N</Required>
+            <Mask>/^tag:[a-zA-Z][0-9a-zA-Z_\-]*(,tag:[a-zA-Z][0-9a-zA-Z_\-]*)*$/u</Mask>
+            <ValidationMessage>
+                Please specify a comma separated list of tags, each prefixed with "tag:", e.g. tag:server,tag:opnsense
+            </ValidationMessage>
+        </advertiseTags>
     </items>
 </model>

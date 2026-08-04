@@ -12,4 +12,11 @@
         <help>Use a non-reusable auth key and disable expiration (optional). If not specified use AuthURL from Status page</help>
         <advanced>true</advanced>
     </field>
+    <field>
+        <id>authentication.advertiseTags</id>
+        <label>Advertise Tags</label>
+        <type>text</type>
+        <help>Comma separated list of ACL tags to register this node with, e.g. tag:server,tag:opnsense (optional). Only used when registering via the AuthURL from the Status page, so leave the pre-authentication key empty. The tags of a pre-auth key are assigned when creating the key instead. You must own the tags in the tailnet ACL. A tagged node is owned by the tag rather than by a user and does not expire, changing tags later requires re-authentication.</help>
+        <advanced>true</advanced>
+    </field>
 </form>

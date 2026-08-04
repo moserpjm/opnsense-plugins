@@ -58,6 +58,12 @@ tailscaled_port="{{ OPNsense.tailscale.settings.listenPort }}"
 {%      else %}
 {%        do up_args.append("--advertise-routes=") %}
 {%      endif %}
+{#    tags only apply to registration via AuthURL, a pre-auth key carries its own tags.
+      never emit an empty --advertise-tags=, that would untag an already registered
+      node, which tailscale rejects without re-authentication #}
+{%      if helpers.exists('OPNsense.tailscale.authentication.advertiseTags') and not helpers.exists('OPNsense.tailscale.authentication.preAuthKey') %}
+{%        do up_args.append("--advertise-tags=" + OPNsense.tailscale.authentication.advertiseTags) %}
+{%      endif %}
 {%      if helpers.exists('OPNsense.tailscale.authentication.preAuthKey') %}
 # Conditionally add auth-key only if not already authenticated
 if [ -f /var/db/tailscale/tailscaled.state ]; then

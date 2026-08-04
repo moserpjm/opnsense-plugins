@@ -29,7 +29,26 @@
 namespace OPNsense\Tailscale;
 
 use OPNsense\Base\BaseModel;
+use OPNsense\Base\Messages\Message;
 
 class Authentication extends BaseModel
 {
+    public function performValidation($validateFullModel = false)
+    {
+        $messages = parent::performValidation($validateFullModel);
+
+        if (
+            ($validateFullModel || $this->preAuthKey->isFieldChanged() || $this->advertiseTags->isFieldChanged()) &&
+            !empty((string)$this->preAuthKey) && !empty((string)$this->advertiseTags)
+        ) {
+            $messages->appendMessage(new Message(
+                gettext('Tags cannot be combined with a pre-authentication key, the tags of a key are ' .
+                    'assigned when the key is created. Leave the key empty to register via the AuthURL ' .
+                    'from the status page.'),
+                $this->advertiseTags->getInternalXMLTagName()
+            ));
+        }
+
+        return $messages;
+    }
 }

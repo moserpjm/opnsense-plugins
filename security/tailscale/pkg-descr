@@ -6,6 +6,10 @@ https://tailscale.com/
 Plugin Changelog
 ================
 
+1.6
+
+* add option to advertise ACL tags, allows registering a tag owned node with a pre-auth key or via the AuthURL from the status page
+
 1.5.1
 
 * improved CARP hook script
